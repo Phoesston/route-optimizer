@@ -26,9 +26,9 @@ export const accounts = pgTable('account', {
     scope: text('scope'),
     id_token: text('id_token'),
     session_state: text('session_state'),
-}, (account) => ({
+}, (account) => [
     primaryKey({columns: [account.provider, account.providerAccountId]}),
-}));
+]);
 
 export const sessions = pgTable('session', {
     sessionToken: text('sessionToken').primaryKey(),
