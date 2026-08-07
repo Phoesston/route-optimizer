@@ -1,4 +1,4 @@
-type Coord = [number, number]; // [latitude, longitude]
+type Coord = [number, number]; // [longitude, latitude]
 
 export async function optimizeRoute(coords: Coord[]): Promise<number[]> {
     if(coords.length < 2) {
