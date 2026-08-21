@@ -45,7 +45,7 @@ export default function Dashboard() {
   }
 
   async function optimize() {
-    await fetch("/api/jobs/optimize", {
+    const res = await fetch("/api/jobs/optimize", {
       method: "POST",
     }).then((r) => r.json());
     if (res.error) alert(res.error);
@@ -61,7 +61,7 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="p-4 max-2-md mx-auto">
+    <main className="p-4 max-w-2xl mx-auto">
 
       <h1 className="text-xl font-semibold mb-4">Today's Route</h1>
 
