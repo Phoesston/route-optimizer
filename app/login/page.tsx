@@ -78,6 +78,7 @@ export default function LoginPage() {
                 >
                     {mode === "login" ? "Don't have an account? Register" : "Already have an account? Login"}
                 </button>
+            </div>
         </main>
     );
 }

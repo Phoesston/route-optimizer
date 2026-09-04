@@ -32,8 +32,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email already in use" }, { status: 409 });
   }
 
-    const hashedPassword = await hashPassword(password);
-    await db.insert(users).values({ email, hashedPassword });
+    const passwordHash = await hashPassword(password);
+    await db.insert(users).values({ email, hashedPassword: passwordHash });
 
     return NextResponse.json({ok:true}, {status: 201});
 }

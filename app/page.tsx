@@ -69,7 +69,7 @@ export default function Dashboard() {
   }
 
   async function optimize() {
-    const res = await fetch("/api/jobs/optimize", {
+    const res = await fetch("/api/optimize", {
       method: "POST",
     }).then((r) => r.json());
     if (res.error) alert(res.error);
