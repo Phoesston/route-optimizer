@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   }
 
     const passwordHash = await hashPassword(password);
-    await db.insert(users).values({ email, passwordHash: hashedPassword });
+    await db.insert(users).values({ email, passwordHash: hashPassword });
 
     return NextResponse.json({ok:true}, {status: 201});
 }
