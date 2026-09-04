@@ -14,8 +14,8 @@ export async function getPendingJobs(userId: string) {
 export async function createJob(data:{
     userId: string;
     address: string;
-    lng: number;
-    lat: number;
+    longitude: number;
+    latitude: number;
     serviceDurationMin?: number;
     priority?: boolean;
 }) {
