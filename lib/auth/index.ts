@@ -35,6 +35,16 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }),
     ],
     callbacks: {
+
+        authorized({auth: session, request}) {
+            // Allow access to API routes and auth routes without requiring a session
+            if (request.nextUrl.pathname.startsWith("/api") || request.nextUrl.pathname.startsWith("/api/auth")) {
+                return true;
+            }
+
+            return Boolean(session?.user?.id);
+        },
+
         async jwt({token, user}) {
             if (user) token.id = user.id;
             return token;

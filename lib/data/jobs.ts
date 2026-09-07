@@ -23,6 +23,15 @@ export async function createJob(data:{
     return job;
 }
 
+export async function deleteJob(userId: string, id: string) {
+    const deleted = await db.delete(jobs)
+    .where(and(eq(jobs.id,id),
+    eq(jobs.userId, userId)))
+    .returning({id:jobs.id});
+
+    return deleted.length > 0;
+}
+
 export async function updateJobSequence(id: string, sequence: number){
     await db.update(jobs).set({sequence}).where(eq(jobs.id, id));
 }
