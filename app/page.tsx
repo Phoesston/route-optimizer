@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {signOut} from "next-auth/react";
 
+
 type Job = {
   id: string;
   address: string;
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function load() {
     try {
@@ -66,6 +68,28 @@ export default function Dashboard() {
     });
     setAddress("");
     load();
+  }
+
+  async function deleteStop(id: string) {
+    if(deletingId !== null) return; // Prevent multiple deletions at once
+
+    setDeletingId(id);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/jobs/${id}`, { method: "DELETE" });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Unable to delete job");
+      }
+
+    setJobs((currentJobs) => currentJobs.filter((job) => job.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to delete job.");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   async function optimize() {
@@ -135,6 +159,16 @@ export default function Dashboard() {
             >
               Navigate
             </button>
+
+            <button
+        type="button"
+        onClick={() => deleteStop(job.id)}
+        disabled={deletingId !== null}
+        aria-label={`Delete stop: ${job.address}`}
+        className="bg-red-600 text-white px-2 py-1 rounded-lg text-sm disabled:opacity-50"
+    >
+        {deletingId === job.id ? "Deleting..." : "Delete"}
+    </button>
           </li>
         ))}
       </ol>
