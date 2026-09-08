@@ -161,14 +161,12 @@ export default function Dashboard() {
             </button>
 
             <button
-        type="button"
-        onClick={() => deleteStop(job.id)}
-        disabled={deletingId !== null}
-        aria-label={`Delete stop: ${job.address}`}
-        className="bg-red-600 text-white px-2 py-1 rounded-lg text-sm disabled:opacity-50"
-    >
-        {deletingId === job.id ? "Deleting..." : "Delete"}
-    </button>
+              type="button"
+              onClick = {() => deleteStop(job.id)}
+              disabled = {deletingId !== null}
+              aria-label = {`Delete stop: ${job.address}`}
+              className="bg-red-600 text-white px-2 py-1 rounded-lg text-sm disabled:opacity-50"
+            > Delete </button>
           </li>
         ))}
       </ol>
