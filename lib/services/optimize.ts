@@ -8,7 +8,7 @@ export async function optimizeRoute(coords: Coord[]): Promise<number[]> {
     const coordStr = coords.map(([lng, lat]) => `${lng},${lat}`).join(";");
     const url = 
         `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coordStr}` +
-        `?source=first&roundtrip=false&geometries=geojson` +
+        `?source=first&destination=last&roundtrip=false&geometries=geojson` +
         `&access_token=${process.env.MAPBOX_TOKEN}`;
 
     const response = await fetch(url);
