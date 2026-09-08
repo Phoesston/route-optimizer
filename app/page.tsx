@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {signOut} from "next-auth/react";
+import { promise } from "zod";
 
 
 type Job = {
@@ -12,6 +13,7 @@ type Job = {
   sequence: number | null;
   status: string;
 }
+
 
 export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -107,6 +109,44 @@ export default function Dashboard() {
       : `https://www.google.com/maps/dir/?api=1&destination=${job.latitude},${job.longitude}`;
     window.open(url, "_blank");
   }
+
+  type CurrentLocation = {
+    longitude : number;
+    latitude  : number;
+  }
+  
+  function getCurrentLocation() : Promise<CurrentLocation>{
+    return new Promise((resolve, reject) => {
+      if(!navigator.geolocation){
+        reject(new Error('Location access is unavailable in this browser'));
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            longitude: position.coords.longitude,
+            latitude: position.coords.latitude,
+          });
+        },
+        (error) => {
+                const message =
+                    error.code === 1
+                        ? "Allow location access to optimize from your position."
+                        : error.code === 3
+                          ? "Finding your location timed out. Please retry."
+                          : "Unable to determine your location.";
+
+                reject(new Error(message));
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10_000,
+                maximumAge: 0,
+            },
+      );
+    });
+  }
+
 
   return (
     <main className="p-4 max-w-2xl mx-auto">
