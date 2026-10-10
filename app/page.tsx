@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {signOut} from "next-auth/react";
-import { promise } from "zod";
-
 
 type Job = {
   id: string;
@@ -14,12 +12,19 @@ type Job = {
   status: string;
 }
 
+type AddressSuggestion = {
+  id: string;
+  address: string;
+};
+
 
 export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
+  const [selectedAddress, setSelectedAddress] = useState<AddressSuggestion | null>(null);
 
   async function load() {
     try {
@@ -52,6 +57,52 @@ export default function Dashboard() {
     void load();
   }, []);
 
+  useEffect(() => {
+
+    const query = address.trim();
+
+    if(address.trim().length < 3 || selectedAddress !== null) return;
+
+    const controller = new AbortController();
+
+    const timer = setTimeout(async () => {
+      try{
+        const response = await fetch(
+          `/api/address-suggestions?q=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+            cache: "no-store",
+          }
+        );
+
+        const data = await response.json();
+
+        if(!response.ok){
+          throw new Error(data.error || "Unable to search addresses.");
+        }
+
+        if(!controller.signal.aborted){
+          setSuggestions(data.suggestions);
+        }
+      } catch(error){
+        if(controller.signal.aborted) return;
+
+        console.error("Address search failed:", error);
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer)
+      controller.abort();
+    };
+  }, [address, selectedAddress]);
+
+  function selectAddress(suggestion: AddressSuggestion){
+    setAddress(suggestion.address);
+    setSelectedAddress(suggestion);
+    setSuggestions([])
+  }
+
   async function addStop() {
     const geocodeRes = await fetch("/api/geocode", {
       method: "POST",
@@ -69,6 +120,8 @@ export default function Dashboard() {
       }),
     });
     setAddress("");
+    setSelectedAddress(null);
+    setSuggestions([]);
     load();
   }
 
@@ -161,12 +214,45 @@ export default function Dashboard() {
       </button>
 
       <div className="flex gap-2 mb-4">
-        <input
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Add a stop"
-          className="flex-1 border rounded-lg px-3 py-2 text-sm"
-        />
+        <div className="relative min-w-0 flex-1">
+          <input
+            value={address}
+            onChange={(e) => {
+              setAddress(e.target.value);
+              setSelectedAddress(null);
+              setSuggestions([]);
+            }}
+            aria-label="Stop address"
+            autoComplete= "off"
+            placeholder="Add a stop"
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+          />
+
+          {suggestions.length > 0 && (
+            <div className="absolute top-full z-10 mt-1 w-full rounded-lg border bg-white text-gray-900 shadow-lg">
+              <ul aria-label="Address suggestions">
+                {suggestions.map((suggestion) => (
+                  <li key = {suggestion.id} className="px-3 py-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => selectAddress(suggestion)}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-blue-50 focus:bg-blue-50"
+                    >
+                      {suggestion.address}
+                    </button>
+                    
+                  </li>
+                ))}
+              </ul>
+
+              <p className="px-3 py-1 text-xs text-gray-500">
+                © Mapbox
+              </p>
+        </div>
+        )}
+      </div>
+        
+
         <button
           onClick={addStop}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
