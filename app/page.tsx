@@ -148,11 +148,31 @@ export default function Dashboard() {
   }
 
   async function optimize() {
-    const res = await fetch("/api/optimize", {
-      method: "POST",
-    }).then((r) => r.json());
-    if (res.error) alert(res.error);
-    load();
+    setError(null);
+
+    try{
+      const origin = await getCurrentLocation();
+
+      const reponse = await fetch("/api/optimize", {
+        method: "POST",
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify({origin}),
+      });
+
+      const data = await reponse.json();
+
+      if(!reponse.ok){
+        throw new Error(data.error || "Unable to optimize your route.");
+      }
+
+      await load();
+    }catch(err){
+      setError(
+        err instanceof Error ? err.message : "Unable to optimize route"
+      );
+    }
   }
 
   function navigate(job: Job) {
@@ -172,6 +192,8 @@ export default function Dashboard() {
     return new Promise((resolve, reject) => {
       if(!navigator.geolocation){
         reject(new Error('Location access is unavailable in this browser'));
+
+        return;
       }
 
       navigator.geolocation.getCurrentPosition(

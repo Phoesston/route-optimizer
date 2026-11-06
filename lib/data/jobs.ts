@@ -8,7 +8,7 @@ export async function getJobForUser(userId: string) {
 
 export async function getPendingJobs(userId: string) {
     return db.select().from(jobs)
-    .where(and(eq(jobs.userId, userId), eq(jobs.status, "pending")));
+    .where(and(eq(jobs.userId, userId), eq(jobs.status, "pending"))).orderBy(jobs.createdAt, jobs.id);
 }
 
 export async function createJob(data:{
